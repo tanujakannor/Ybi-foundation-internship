@@ -1,0 +1,176 @@
+TITLE OF THE PROJECT : FISH WEIGTH PREDICTION
+-TANUJA KANNOR
+OBJECTIVES :
+1 Data Collection :
+Biometric measurements (total length and body weight) were collected for 19 fish families, viz., Siganidae, Leiognathidae, Ambassidae, Lutjanidae, Tetraodontidae, Apogonidae , Ariidae, Terapontidae, Belonidae, Tetrarogidae, Lethrinidae, Hemiramphidae, Latidae, Paralichthyidae, Haemulidae, Serranidae, Gerreidae, Gobiidae, and Eleotridae (n=8662), from three different locations in Setiu Wetland, Terengganu, as mentioned in Table 1.
+Table 1. Location coordinates for three sample sitesSite No. Location Name Latitude Longitude Site 1 (North) Pulau Telaga Tujuh 5° 41’ 43.13” N 102° 41’ 52.01” E Site 2 (Middle) Pulau Che Him 5° 41’ 0.07” N 102° 42’ 35.54” ESite 3 (South) Pulau Tok Haji 5° 39’ 42.38” N 102° 44’ 5.31” E From June 2011 to July 2012, sampling was conducted during wet and dry seasons.
+2 Data Preparation :
+The data are pre-processed for analysis. Python programming by Jupyter Notebook of the Anaconda Navigator Software was used as a tool. Initially, the data-cleaning process is carried out on the dataset by wrangling, renaming the header, and deleting any missing values using the Pandas Python library. The outlier values were removed by Interquartile Range (IQR) Analysis for total length and body weight variables. Removing outliers helps the model capture the underlying patterns and relationships in the data more effectively, leading tobetter generalisation and predictive performance. We can generate more reliable estimates and reduce the potential bias the extreme values introduce [23, 24].
+3 ML Model Development :
+In this study, we implemented regression algorithms as a method for prediction. The study adopts two regression types: Linear Regression (i.e., Multiple Linear, Lasso, and Ridge) and Tree-based Regression (i.e., Decision Tree, Random Forest, and XG Boost model). Two encoding methods in Scikit-Learn were used to convert categorical data into numbers. OneHotEncoder class is required for Linear Regression, and the OrdinalEncoder class is functional for tree-based models. Hyperparameter tuning was performed to the Lasso and Ridge regression model to determine the optimal values of parameters using the GridSearchCV function in Scikit-Learn. The data were split into the training and testing sets with a split ratio of 70:30, respectively, using the Scikit-learn Python library via the train_test_split() function. The training set is used for training the model, and the testing set is used for testing the model’s accuracy. The split ratio value was chosen according to the study by Picard and Berk [25],Dobbin and Simon [26], Pham et al. [27], and Nguyen et al. [28].
+4 Models Validation :
+A k-fold cross-validation (CV) approach was used to validate all developed models. This approach divides the whole dataset into k non-overlapping folds at random, then utilises k-1 folds for model construction and the remaining 1-fold for validation. This step is performed k times such that each fold is used as the validation set once at the end. The k-fold CV is a robust approach for estimating model accuracy that involves averaging the k outcomes to create a single estimate for a model. It is common practice to replicate the k-fold CV to maintain stability in model performance. The 15-fold CV was adopted since most model performance estimates were almost unbiased when k was between 10 and 20 [29].
+5 Model Performance Evaluation :
+We evaluated and compared the overall performance of all regression models by employing three model performance measures: Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and Coefficient of Determination (R2 ). The MAE informs us of the average size ofan error from the forecast, whereas the RMSE displays the average distances between and observed data [30]. R2 measures how effectively predictors account for variation in response variables. R2 values vary from 0 to 1, with 1 indicating perfect model fit. The best model has the lowest MAE and RMSE values and the highest R2.
+
+IMPORT LIBRARY :
+
+# Step 1 : import library
+import pandas as pd
+
+IMPORT DATA  :
+fish.head()
+
+DESCRIBE DATA :
+Category	Species	Weight	Height	Width	Length1	Length2	Length3
+0	1	Bream	242.0	11.5200	4.0200	23.2	25.4	30.0
+1	1	Bream	290.0	12.4800	4.3056	24.0	26.3	31.2
+2	1	Bream	340.0	12.3778	4.6961	23.9	26.5	31.1
+3	1	Bream	363.0	12.7300	4.4555	26.3	29.0	33.5
+4	1	Bream	430.0	12.4440	5.1340	26.5	29.0	34.0
+
+fish.info()
+     
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 159 entries, 0 to 158
+Data columns (total 8 columns):
+ #   Column    Non-Null Count  Dtype  
+---  ------    --------------  -----  
+ 0   Category  159 non-null    int64  
+ 1   Species   159 non-null    object 
+ 2   Weight    159 non-null    float64
+ 3   Height    159 non-null    float64
+ 4   Width     159 non-null    float64
+ 5   Length1   159 non-null    float64
+ 6   Length2   159 non-null    float64
+ 7   Length3   159 non-null    float64
+dtypes: float64(6), int64(1), object(1)
+memory usage: 10.1+ KB
+
+fish.describe()
+
+DATA VISUALIZATION :
+
+Category	Weight	Height	Width	Length1	Length2	Length3
+count	159.000000	159.000000	159.000000	159.000000	159.000000	159.000000	159.000000
+mean	3.264151	398.326415	8.970994	4.417486	26.247170	28.415723	31.227044
+std	1.704249	357.978317	4.286208	1.685804	9.996441	10.716328	11.610246
+min	1.000000	0.000000	1.728400	1.047600	7.500000	8.400000	8.800000
+25%	2.000000	120.000000	5.944800	3.385650	19.050000	21.000000	23.150000
+50%	3.000000	273.000000	7.786000	4.248500	25.200000	27.300000	29.400000
+75%	4.500000	650.000000	12.365900	5.584500	32.700000	35.500000	39.650000
+max	7.000000	1650.000000	18.957000	8.142000	59.000000	63.400000	68.000000
+
+DEFINE TARGET VARIABLE(Y) AND FEATURE VARIABLES (X) :
+
+# Step 3 : define target (y) and features (X)
+
+Index(['Category', 'Species', 'Weight', 'Height', 'Width', 'Length1',
+       'Length2', 'Length3'],
+      dtype='object')
+
+y = fish['Weight']
+
+X = fish[['Category','Height', 'Width', 'Length1',
+       'Length2', 'Length3']]
+     
+
+TRAIN TEST SPLIT :
+
+# Step 4 : train test split
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y, train_size=0.7, random_state=2529)
+
+# check shape of train and test sample
+X_train.shape, X_test.shape, y_train.shape, y_test.shape
+
+MODELING :
+  # Step 5 : select model
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+
+MODEL EVALUATION :
+
+# Step 6 : train or fit model
+model.fit(X_train,y_train)
+
+LinearRegression()
+
+
+model.intercept_
+
+-684.4235918478537
+
+model.coef_
+
+
+array([ 35.19634977,  52.19372157, -37.13869125,  11.2218449 ,
+        78.11233002, -59.11783139])
+
+PREDICTION :
+
+
+# Step 7 : predict model
+y_pred = model.predict(X_test)
+
+
+y_pred
+
+array([ 475.93351307,  525.81910195,   77.63275849,  881.10235121,
+        160.9685664 ,  255.94371856,  361.87029932,  358.87068094,
+        499.83411068, -150.07834151, -115.91810869,  428.65470115,
+        114.67533404,  812.51385122,  586.5071178 ,  273.38510858,
+        579.63900729,  225.18126845,  639.26068037,   85.00820599,
+        136.92159041,  -87.7778087 ,  629.97231046,  732.63097812,
+        859.8720695 , -166.76928607,  342.04209934,  722.92198147,
+        321.44827179,  787.98248357,  486.93194673,  541.89982795,
+        376.74813045,  624.81211202, -170.11945033,  917.76513801,
+        792.26439518,  -21.15655005,  300.24921659,  914.07325473,
+        621.05636286,  934.17373986,  676.85479574,  653.92304403,
+        615.51226767,  336.61090622,  505.75519147,  -33.53283763])
+
+# Step 8 : model accuracy
+from sklearn.metrics import mean_absolute_error, r2_score
+
+mean_absolute_error(y_test,y_pred)
+
+99.58910366731813
+
+r2_score(y_test,y_pred)
+
+0.83982461599445
+
+EXPLAINATION :
+Predicting fish weight is crucial in ecology because it helps estimate fish population size and distribution, which is vital for monitoring and managing fish. This data is essential for assessing population changes and health [1, 2], understanding ecosystem trophic interactions, energy flow, and food web structure [3], and biodiversity studies to assess species diversity and abundance [4]. Additionally, fish weight data is vital for ecosystem modelling [3] and addressing factors like fishing and climate change's impact on fish populations and habitats, as shifts in fish weight can signal changes in growth rates, productivity, and species composition [5], ultimately contributing to the sustainable management of fisheries for setting catch limits, crafting effective fishing regulations, and implementing conservation strategies, thus ensuring the long-term viability of fish stocks [6]. Typically, the process of measuring the weight of fish is conducted manually on a perindividual basis. Nevertheless, this procedure is challenging, time-intensive, and stressful for the fish. Weight measurements on fresh or frozen fish can vary significantly due to factors like fish wetness, environmental conditions, and scale capacity. Multiple scales of different sizes should be used to ensure accuracy, with an accuracy of ±1%. Frozen fish are lighter and shorter than fresh ones [7]. Hence, the development of rapid, precise, cost-effective, and indirect measuring techniques would be significant to the field of ecology, and one of the methods is using machine learning.Machine learning (ML) refers to the scientific investigation of algorithms and statistical employed by computer systems to execute a designated task based on an example of a dataset without requiring explicit programming [8]. Regression is a form of supervisedlearning that predicts a dependent variable by estimating the correlation between independent variables [9]. Linear Regression is a widely utilised learning technique for its fundamental nature and frequent application in predictive analysis [10]. Multiple Linear Regression indicates that there is more than one independent variable. The Least Absolute Shrinkage and Selection Operator (Lasso) combines variable selection and regularisation to enhance prediction accuracy by reducing the number of variables, a process known as variable shrinkage, within a statistical model [11]. Ridge Regression mitigates the problem of multicollinearity by incorporating a regularisation term into Linear Regression models, particularly in cases where the independent variables exhibit significant correlation [11]. 
+This research aims to demonstrate the potential use of ML regression algorithms for predicting fish weight in the Setiu Wetland, Terengganu area. The motivation behind this methodology is to analyse the prediction performance of ML regression models by applying different statistical analysis techniques. This paper selected two regression types, Linear Regression (i.e., Multiple Linear, Lasso, and Ridge model) and Tree-based Regression (i.e., XGBoost, Random Forest, and Decision Tree model) for prediction purposes. Regarding the model performance and k-fold CV result (k=15), the ML proposed successfully predicted fish weight with low MSE and MAE values and high R² value. However, the Tree-based Regression model provides more accurate prediction results than the Linear Regression model. Among the six proposed ML regressions, Random Forest is the best predictive model with the highest accuracy value of 96.1%, while the lowest RMSE and MAE score values are 3.352 and 0.880, respectively. The model possesses limitations that require consideration in intending to incorporate other independent variables or information, including but not limited to fork length, standard length, species, age, and sex. In addition, the modelling method does not account forVenvironmental factors such as water temperature, salinity, pH level, dissolved oxygen, or condition factor, indicating the fish's general well-being and health. These factors are known to influence fish growth and weight significantly. In the future, developing more sophisticated ML algorithms and techniques can contribute to more accurate and robust prediction models. Exploring advanced deep learning and ensemble learning methods or combining ML algorithms with other techniques, such as image segmentation and processing, may yield improved prediction accuracy, generalisation, and model interpretability. By incorporating weight prediction into ecological research and management practices, we may make informed decisions supporting the conservation and sustainable use of fish populations and their habitats.
+
+
+
+
+
+
+ 
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
