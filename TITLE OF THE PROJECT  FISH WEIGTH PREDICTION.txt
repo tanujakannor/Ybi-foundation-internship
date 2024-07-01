@@ -19,7 +19,8 @@ IMPORT LIBRARY :
 import pandas as pd
 
 IMPORT DATA  :
-fish.head()
+fish = pd.read_csv('https://github.com/ybifoundation/Dataset/raw/main/Fish.csv')
+
 
 DESCRIBE DATA :
 Category	Species	Weight	Height	Width	Length1	Length2	Length3
